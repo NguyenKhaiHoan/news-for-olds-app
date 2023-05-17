@@ -1,6 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:get/get.dart';
 import 'package:ttcm/screens/setting.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
+import '../controller/news_controller.dart';
+import '../model/news_model.dart';
 
 class DetailScreen extends StatefulWidget {
   @override
@@ -12,9 +17,23 @@ class _DetailScreenState extends State<DetailScreen> {
   late TutorialCoachMark tutorialCoachMark;
 
   GlobalKey textToSpeech = GlobalKey();
+  GlobalKey saveFavorite = GlobalKey();
   GlobalKey setting = GlobalKey();
-  GlobalKey next = GlobalKey();
-  GlobalKey previous = GlobalKey();
+
+  final FlutterTts flutterTts = FlutterTts();
+  late String text;
+  Future speak() async {
+    await flutterTts.setLanguage('vi-VN');
+    await flutterTts.setPitch(1.0);
+    await flutterTts.setVolume(1.0);
+    await flutterTts.speak(text);
+  }
+
+  double currentsize = 0.5;
+
+  Future stop() async {
+    flutterTts.stop();
+  }
 
   @override
   void initState() {
@@ -26,6 +45,7 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    List<News> newsList = News.newsList;
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -34,7 +54,7 @@ class _DetailScreenState extends State<DetailScreen> {
         child: PageView(
           controller: _pageController,
           scrollDirection: Axis.horizontal,
-          children: List.generate(3, (int index) =>
+          children: List.generate(10, (int index) =>
             Stack(
               children: [
                 SingleChildScrollView(
@@ -42,7 +62,7 @@ class _DetailScreenState extends State<DetailScreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Image.asset('assets/images/Ảnh tiêu đề.png'),
+                      Image.asset('assets/images/poster-${index}.png'),
                       SizedBox(
                         height: 30,
                       ),
@@ -52,7 +72,7 @@ class _DetailScreenState extends State<DetailScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'THỂ THAO',
+                              newsList[index].category.toUpperCase(),
                               style: TextStyle(
                                   color: Color.fromRGBO(136, 136, 136, 1),
                                   fontFamily: 'Inter',
@@ -65,7 +85,7 @@ class _DetailScreenState extends State<DetailScreen> {
                               height: 30,
                             ),
                             Text(
-                              'Newcastle giành vị trí thứ ba từ Man Utd',
+                              newsList[index].newsTitle,
                               style: TextStyle(
                                   color: Color.fromRGBO(0, 0, 0, 1),
                                   fontFamily: 'Inter',
@@ -85,7 +105,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                     height: 90,
                                     decoration: BoxDecoration(
                                       image : DecorationImage(
-                                          image: AssetImage('assets/images/image 2.png'),
+                                          image: AssetImage('assets/images/icon-${index}.png'),
                                           fit: BoxFit.fitWidth
                                       ),
                                     )
@@ -96,7 +116,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Cây bút: Anna Nguyen (VnExpress)',
+                                    Text(newsList[index].userName,
                                       style: TextStyle(
                                           color: Color.fromRGBO(0, 0, 0, 1),
                                           fontFamily: 'Inter',
@@ -109,7 +129,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                     SizedBox(
                                       height: 8,
                                     ),
-                                    Text('8 giờ trước',
+                                    Text(newsList[index].time,
                                       style: TextStyle(
                                           color: Color.fromRGBO(136, 136, 136, 1),
                                           fontFamily: 'Inter',
@@ -125,20 +145,10 @@ class _DetailScreenState extends State<DetailScreen> {
                             SizedBox(
                               height: 40,
                             ),
-                            Text('Thất bại 0-2 trên sân Newcastle tối 2/4 khiến Man Utd bị chính đối thủ qua mặt sau vòng 29 Ngoại hạng Anh.',
-                              style: TextStyle(
-                                  color: Color.fromRGBO(102, 102, 102, 1),
-                                  fontFamily: 'Inter',
-                                  fontSize: 40,
-                                  fontWeight: FontWeight.normal,
-                                  fontStyle: FontStyle.italic,
-                                  height: 1
-                              ),
-                            ),
                             SizedBox(
                               height: 15,
                             ),
-                            Text('Bất bại bốn trận gần nhất, trong đó có ba chiến thắng, nhưng Man Utd được dự đoán gặp nhiều khó khăn khi làm khách của Newcastle - đội thường xuyên có mặt trong nhóm đua tranh top 4 mùa này. Và 90 phút trên sân St James Park chứng tỏ điều đó. Đội chủ nhà áp đảo với 15 lần dứt điểm, trong đó có sáu pha trúng đích. Còn Man Utd chỉ dứt điểm bốn lần, với vỏn vẹn một cú sút trúng khung thành từ Antony. Newcastle chơi trên chân từ những phút đầu. Những pha lên bóng của họ đa dạng và tiềm ẩn nguy cơ từ hai cánh. Nếu dứt điểm tốt hơn, thầy trò Eddie Howe đã sớm có bàn khi hàng thủ Man Utd chơi như mơ ngủ. Điểm sáng duy nhất bên phía đội khách là thủ thành David De Gea, người vẫn trình diễn những pha cứu thua ngoạn mục. Đáng kể nhất là phút 15, khi De Gea liên tiếp cản hai pha dứt điểm cận thành của Alexander Isak rồi Joseph Willock. Cuối hiệp một, Newcastle tiếp tục bỏ lỡ một cơ hội mười mươi. Lần này, De Gea không kịp phản xạ, nhưng cú sút trái phá ở cự ly gần của Willock vọt xà gang tấc. Trái lại, những pha lên bóng của đội khách tương đối rời rạc. Erik ten Hag đẩy Scott McTominay lên cao để tận dụng phong độ của tiền vệ này, người vừa ghi bốn bàn trong hai trận khoác áo tuyển Scotland, đồng thời kéo Bruno Fernandes xuống thấp để làm bóng, chữa cháy cho sự vắng mặt của Casemiro. Tuy nhiên, ý đồ này không mấy hiệu quả bởi McTominay lẫn Wout Weghorst đều khá vụng về. Sự nhiệt tình của họ chỉ giúp Man Utd phòng ngự từ xa tốt hơn, như tình huống mở ra cơ hội để Weghorst sút chệch cột đầu trận.',
+                            Text(newsList[index].decription,
                               textAlign: TextAlign.justify,
                               style: TextStyle(
                                   color: Color.fromRGBO(0, 0, 0, 1),
@@ -147,6 +157,24 @@ class _DetailScreenState extends State<DetailScreen> {
                                   fontWeight: FontWeight.normal,
                                   height: 1.5
                               ),
+                            ),
+                            SizedBox(
+                              height: 90,
+                            ),
+                            Center(
+                              child:Text("Hết",
+                                textAlign: TextAlign.justify,
+                                style: TextStyle(
+                                    color: Color.fromRGBO(0, 0, 0, 1),
+                                    fontFamily: 'Inter',
+                                    fontSize: 40,
+                                    fontWeight: FontWeight.normal,
+                                    height: 1.5
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 10,
                             )
                           ],
                         ),
@@ -176,7 +204,17 @@ class _DetailScreenState extends State<DetailScreen> {
                             borderRadius : BorderRadius.all(Radius.elliptical(90, 90)),
                           ),
                           child: Center(
-                            child: Image.asset('assets/images/image 3.png', height: 60, width: 60,),
+                            child: GestureDetector(
+                              child: Image.asset('assets/images/speech.png', height: 60, width: 60,),
+                              onTap: () => {
+                                text = newsList[index].newsTitle + newsList[index].decription,
+                                speak(),
+                              },
+
+                              onDoubleTap: () => {
+                                stop(),
+                              },
+                            )
                           ),
                         ),
                         SizedBox(
@@ -199,7 +237,7 @@ class _DetailScreenState extends State<DetailScreen> {
                               borderRadius : BorderRadius.all(Radius.elliptical(90, 90)),
                             ),
                             child: Center(
-                              child: Image.asset('assets/images/image 4.png', height: 60, width: 60,),
+                              child: Image.asset('assets/images/setting.png', height: 60, width: 60,),
                             ),
                           ),
                           onTap:() => Navigator.of(context).push(
@@ -210,6 +248,77 @@ class _DetailScreenState extends State<DetailScreen> {
                         )
                       ],
                     )
+                ),
+                Positioned(
+                  top: 30,
+                  right: 30,
+                  child: ClipOval(
+                    key: saveFavorite,
+                      child: Container(
+                        height: 80,
+                        width: 80,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                        ),
+                        child: IconButton(
+                          onPressed: () {
+                            Get.put(NewsController())
+                                .addToFavorite(newsList[index]);
+                            var snackBar = SnackBar(
+                              backgroundColor: Colors.transparent,
+                              elevation: 0,
+                              content: Container(
+                                  padding: const EdgeInsets.all(15),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey,
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Get.put(NewsController()).isInFavorite(newsList[index])
+                                          ? const Icon(
+                                            Icons.bookmark,
+                                            color: Colors.red,
+                                            size: 40,
+                                          )
+                                          : const Icon(
+                                            Icons.bookmark_outline,
+                                            color: Colors.black,
+                                            size: 40,
+                                          ),
+                                     Padding(
+                                        padding: EdgeInsets.only(left: 10.0),
+                                        child: Text(
+                                            Get.put(NewsController()).isInFavorite(newsList[index])
+                                            ? 'Lưu trữ thành công'
+                                            : "Xóa khỏi yêu thích",
+                                            style: TextStyle(color: Colors.white, fontSize: 30)),
+                                      ),
+                                      const Spacer(),
+                                      TextButton(onPressed: () => debugPrint("Undid"), child: Text("Hoàn tác", style: TextStyle(color: Colors.white, fontSize: 30),))
+                                    ],
+                                  )
+                              ),
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                          },
+                          icon: Obx(
+                                () => Get.put(NewsController())
+                                .isInFavorite(newsList[index])
+                                ? const Icon(
+                              Icons.bookmark,
+                              color: Colors.red,
+                                  size: 55,
+                            )
+                                : const Icon(
+                              Icons.bookmark_outline,
+                              color: Colors.black,
+                                  size: 55,
+                            ),
+                          ),
+                        ),
+                      )),
                 )
               ]
             ),
@@ -317,54 +426,21 @@ class _DetailScreenState extends State<DetailScreen> {
     targets.add(
       TargetFocus(
         identify: "3",
-        keyTarget: next,
-        alignSkip: Alignment.topRight,
+        keyTarget: saveFavorite,
+        alignSkip: Alignment.bottomCenter,
         contents: [
           TargetContent(
             align: ContentAlign.custom,
             customPosition: CustomTargetContentPosition(
-              top: 30,
-              bottom: 30,
+              left: 400,
+              top: 35,
             ),
             builder: (context, controller) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const <Widget>[
                   Text(
-                    "Quẹt sang trái để sang bài tiếp theo",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 36,
-                        fontWeight: FontWeight.w800,
-                        fontFamily: 'Inter',
-                        fontStyle: FontStyle.italic
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
-    );
-    targets.add(
-      TargetFocus(
-        identify: "4",
-        keyTarget: previous,
-        alignSkip: Alignment.topRight,
-        contents: [
-          TargetContent(
-            align: ContentAlign.custom,
-            customPosition: CustomTargetContentPosition(
-              top: 30,
-              bottom: 30,
-            ),
-            builder: (context, controller) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const <Widget>[
-                  Text(
-                    "Quẹt sang phải để đọc lại bài trước đó",
+                    "Nhấn để lưu bài báo",
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 36,

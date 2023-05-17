@@ -66,18 +66,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     {
       "id": 8,
       "value": false,
-      "title": "Sức khỏe - đời sống",
+      "title": "Sức khỏe - Đời sống",
     },
     {
       "id": 9,
       "value": false,
       "title": "Du lịch",
     },
-    {
-      "id": 10,
-      "value": false,
-      "title": "Xã hội",
-    }
   ];
 
   @override
